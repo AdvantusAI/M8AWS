@@ -5,7 +5,7 @@ const sequelize = require('./config/database');
 var bodyParser = require('body-parser')
 const userRoutes = require('./routes/userRoutes');
 const salesRoutes = require('./routes/salesRoutes');
-const dashboardRoutes = require('./routes/dashboardRoutes');
+const dashboardRoutes = require('./routes/dashboardRoute');
 const cataloguesRoutes = require('./routes/cataloguesRoutes');
 require('dotenv').config();
 const app = express();
