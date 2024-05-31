@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <title>Title</title>
+        <!-- Plugins css -->
+        <link href="../assets/plugins/datatables/dataTables.bootstrap4.css" rel="stylesheet" type="text/css" />
+        <link href="../assets/plugins/datatables/responsive.bootstrap4.css" rel="stylesheet" type="text/css" />
+        <link href="../assets/datatables/buttons.bootstrap4.css" rel="stylesheet" type="text/css" />
+        <link href="../assets/datatables/select.bootstrap4.css" rel="stylesheet" type="text/css" />
+    
+        <!-- App css -->
+        <link href="../assets/css/bootstrap.css" rel="stylesheet" type="text/css" />
+        <link href="../assets/css/icons.min.css" rel="stylesheet" type="text/css" />
+        <link href="../assets/css/theme.min.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+  <style>
+
+  </style>
+   
+   <div class="row">
+    <div class="col-12">
+        <div class="card-body">
+            <h4 class="card-title">Key Data Table</h4>
+            <p class="card-subtitle mb-4">
+                KeyTable provides Excel like cell navigation on any table. Events (focus, blur, action etc) can be assigned to individual
+                cells, columns, rows or all cells.
+            </p>
+
+            <table id="key-datatable" class="table dt-responsive nowrap">
+                    <thead class="thead-light">
+                      
+                        <tr>
+                            <th>Id Categoría</th>
+                            <th>Nombre</th>
+                            <th>Producto</th>
+                 
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <% categories.forEach(category => { %>
+                        <tr>
+                          
+                                <td><%= category.categoryId %></td>
+                         
+                                <td><%= category.categoryName %></td>
+                          
+                            
+                            <td>5421</td>
+
+                        </tr>
+                        <% }) %>                       
+  
+                </table>
+
+            </div> <!-- end card body-->
+        </div> <!-- end card -->
+    </div><!-- end col-->
+</div>
+<!-- end row-->
+<h1>Categories and Their Products</h1>
+<% categories.forEach(category => { %>
+    <h2><%= category.categoryName %></h2>
+    <ul>
+        <% category.products.forEach(product => { %>
+            <li><%= product.productName %></li>
+        <% }) %>
+    </ul>
+<% }) %>
+       
+
+
+      <!-- Overlay-->
+     <div class="menu-overlay"></div>
+
+
+     <!-- jQuery  -->
+     <script src="../assets/js/jquery.min.js"></script>
+     <script src="../assets/js/bootstrap.bundle.min.js"></script>
+     <script src="../assets/js/metismenu.min.js"></script>
+     <script src="../assets/js/waves.js"></script>
+     <script src="../assets/js/simplebar.min.js"></script>
+ 
+     <!-- third party js -->
+     <script src="../assets/plugins/datatables/jquery.dataTables.min.js"></script>
+     <script src="../assets/plugins/datatables/dataTables.bootstrap4.js"></script>
+     <script src="../assets/plugins/datatables/dataTables.responsive.min.js"></script>
+     <script src="../assets/plugins/datatables/responsive.bootstrap4.min.js"></script>
+     <script src="../assets/plugins/datatables/dataTables.buttons.min.js"></script>
+     <script src="../assets/plugins/datatables/buttons.bootstrap4.min.js"></script>
+     <script src="../assets/plugins/datatables/buttons.html5.min.js"></script>
+     <script src="../assets/plugins/datatables/buttons.flash.min.js"></script>
+     <script src="../assets/plugins/datatables/buttons.print.min.js"></script>
+     <script src="../assets/plugins/datatables/dataTables.keyTable.min.js"></script>
+     <script src="../assets/plugins/datatables/dataTables.select.min.js"></script>
+     <script src="../assets/plugins/datatables/pdfmake.min.js"></script>
+     <script src="../assets/plugins/datatables/vfs_fonts.js"></script>
+     <!-- third party js ends -->
+ 
+     <!-- Datatables init -->
+     <script src="../assets//pages/datatables-demo.js"></script>
+ 
+     <!-- App js -->
+     <script src="../assets/assets/js/theme.js"></script>
+ 
+  </body>
+</html>

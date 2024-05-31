@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuario</title>
+</head>
+<body>
+    <h1>Registro de Usuario</h1>
+    <form action="/register" method="POST">
+        <input class="form-control" type="text" name="username" placeholder="username" required>
+        <input class="form-control" type="text" name="email" placeholder="email" required>
+        <input class="form-control" type="password" name="password" placeholder="password" required>
+        <input type="checkbox" id="chk1"><label for="chk1">Recordarme</label>
+        <div class="form-button">
+            <button id="submit" type="submit" class="ibtn">Iniciar sesión</button>
+        </div>
+    </form>
+</body>
+</html>

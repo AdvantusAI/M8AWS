@@ -1,0 +1,86 @@
+<!-- Includes all JS & CSS for the JavaScript Data Grid -->
+
+
+
+<html lang="en">
+ <head>
+   <!-- Includes all JS & CSS for the JavaScript Data Grid -->
+   <script src="../assets/aggrid/ag-grid-enterprise.min.js"></script>
+ </head>
+ <body>
+   <!-- Your grid container -->
+   <div id="myGrid" class="ag-theme-quartz" style="height: 500px"></div>
+
+
+    
+       <div id="myGrid" style="height: 500px; width:500px;" class="ag-theme-alpine"></div>
+       <script>
+
+      
+        agGrid.LicenseManager.setLicenseKey("DownloadDevTools_COM_NDEwMjM0NTgwMDAwMA==59158b5225400879a12a96634544f5b6");
+
+        let gridApi;
+
+        const gridOptions = {
+        columnDefs: [
+          // group cell renderer needed for expand / collapse icons
+          { field: "categoryId", width: 90, minWidth: 50,    maxWidth: 150, headerName: "Id. Categoría", cellRenderer: "agGroupCellRenderer", filter: true },
+          { field: "categoryName", filter: true , headerName: "Nombre de la Categoría"},
+        ],
+        defaultColDef: {
+          flex: 1,
+        },
+        masterDetail: true,
+        detailCellRendererParams: {
+          detailGridOptions: {
+            columnDefs: [
+
+            { field: 'productId', headerName: 'Id. del producto',  width: 90, minWidth: 50,    maxWidth: 150, headerName: "Id. Producto", filter: true,
+            cellRenderer: function(params) {
+                let keyData = params.data.productId;
+                let newLink = `<a href=/api/product?productId=/${keyData}-getting-started target="_blank">${keyData}</a>`;
+                return newLink;
+              },
+              flex: 1,
+            },
+              
+              { field: "productName", width: 90, minWidth: 150,  maxWidth: 250, headerName: "Nombre del Producto", filter: true},
+              { field: "description", headerName: "Descripción", filter: true },
+            ],
+            defaultColDef: {
+              flex: 1,
+            },
+            localeText: {
+            searchOoo: "Search values...",
+            noMatches: "No matches could be found.",
+  },
+          },
+          getDetailRowData: (params) => {
+      params.successCallback(params.data.products);
+    },
+  },
+};
+
+
+
+
+     
+          // setup the grid after the page has finished loading
+          document.addEventListener("DOMContentLoaded", function () {
+            var gridDiv = document.querySelector("#myGrid");
+            gridDiv.style.setProperty("width", '100%');
+            gridDiv.style.setProperty("height", '100%');
+            gridApi = agGrid.createGrid(gridDiv, gridOptions);
+
+            fetch("/api/product")
+              .then((response) => response.json())
+              .then((data) => {
+                gridApi.setGridOption("rowData", data.categories);
+              });
+          });
+
+       
+       </script>
+   </body>
+   </html>
+   
