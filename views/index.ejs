@@ -471,16 +471,16 @@
 
       function LlenaGrid()
       {
-        let gridApiForecast;
+        let gridApiFcst;
         const gridOptionsForecast = {
           columnDefs: [
-            // group cell renderer needed for expand / collapse icons
+         
             ],
             defaultColDef: {
-                flex: 1,
-                editable: true
-              },
-              alwaysShowHorizontalScroll: true,
+                sortable: true,
+                editable: true,
+                resizable: true
+            },
               autoSizeStrategy: {
                   type: "fitCellContents"
             },
@@ -494,20 +494,19 @@
         const locationId = '8';
         const apiCall = `/api/dashboard/pivoted-history?productId=${encodeURIComponent(productId)}&locationId=${encodeURIComponent(locationId)}`
         fetch(apiCall)
-        .then((response) => response.json())
-        .then((data) => {
-          // set the column headers from the data
-          const colDefs = gridApiLoc.getColumnDefs();
-          colDefs.length=0;
+          .then((response) => response.json())
+          .then((data) => {
+            // set the column headers from the data
+          const colDefs = gridApiFcst.getColumnDefs();
+          
           const keys = Object.keys(data[0])
           keys.forEach(key => {
-            if (key == 'ProductId' || key == 'LocationId')
-              colDefs.push({field : key, hide: true, cellDataType : 'number', editable: false})
-            else if (key == 'Descripcion')
-              colDefs.push({field : key, pinned: 'left', pinned: 'left', editable: false})
+            if (key == 'descripcion')
+              colDefs.push({field : key,  pinned: 'left', editable: false});
             else
-              colDefs.push({field : key, suppressSizeToFit: true })
+              colDefs.push({field : key});
           });
+          
           gridApiFcst.setGridOption('columnDefs', colDefs);
           gridApiFcst.setGridOption("rowData", data);
         }
