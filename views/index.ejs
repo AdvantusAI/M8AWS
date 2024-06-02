@@ -481,38 +481,60 @@
                 resizable: true,
                 enableCellChangeFlash: true
             },
+
               autoSizeStrategy: {
                   type: "fitCellContents"
             },
             singleClickEdit: true,
+           
             onCellValueChanged: onCellValueChanged,
+            onCellClicked : onCellClicked,
+          
         };   
-       
+
+        function onCellClicked(event) {
+          var column = event.column.colDef.field;
+          const rowIndex = event.node.rowIndex;
+          //var columnId = event.column.getId();
+        
+          if (rowIndex <2){
+            gridApiFcst.stopEditing();
+          };
+            
+          /*alert(newVal);
+          alert(rowIndex);
+          alert(column);
+          alert(rowNode.data.Descripcion);
+          */
+        };
+
         function onCellValueChanged(event) {
+      
+          const rowIndex = event.node.rowIndex;
           var column = event.column.colDef.field;
           var columnId = event.column.getId();
-          event.column.colDef.cellStyle = { 'background-color': 'cyan' };
+          event.column.colDef.cellStyle = { 'background-color': '#f5d4bf' };
+          const rowNode = gridApiFcst.getRowNode(rowIndex); 
+          const newVal = event.newValue;
+          const oldVal = event.oldValue;
+          alert(rowIndex);
+          if (newVal != oldVal)
+              event.column.colDef.field.cellStyle = { 'background-color': '#f5d4bf' };
+
           event.api.refreshCells({
                 force: true,
                 columns: [column],
                 rowNodes: [event.node]
         });
-        event.node.data['changed'] = true;
-        const rowData = [];
-        gridApiFcst.forEachNode(function (node) {
-          rowData.push(node.data);
-        });
-        alert(JSON.stringify(rowData));
+        event.column.colDef.editable = false;
+      /*  alert(newVal);
+        alert(rowIndex);
+        alert(column);
+        alert(rowNode.data.Descripcion);
+        */
       };
 
-        // sets each columns headerName property
-        function setHeaderNames() {
-          var columnDefs = gridApiFcst.getColumnDefs();
-          columnDefs.forEach(function (colDef, index) {
-            colDef.headerName = 'C' + index;
-          });
-          gridApiFcst.setColumnDefs(columnDefs);
-        } 
+    
 
         var gridDivForecast = document.querySelector("#myGridForecast");
         gridApiFcst = agGrid.createGrid(gridDivForecast, gridOptionsForecast);
@@ -525,14 +547,14 @@
             // set the column headers from the data
           const colDefs = gridApiFcst.getColumnDefs();
           
-          const keys = Object.keys(data[0])
+          const keys = Object.keys(data[0]);
           keys.forEach(key => {
             if (key == 'ProductId' || key == 'LocationId')
               colDefs.push({field : key, hide: true, cellDataType : 'number', editable: false, minWidth: 100, maxWidth: 200})
             else if (key == 'Descripcion')
-              colDefs.push({field : key,  pinned: 'left', editable: false, colId: "Descripcion"});
+              colDefs.push({field : key,  pinned: 'left', editable: false, colId: "Descripcion"  });
             else
-              colDefs.push({field : key});
+              colDefs.push({field : key });
           });
           //gridApiFcst.setColumnDefs(colDefs);
           gridApiFcst.setGridOption('columnDefs', colDefs);
