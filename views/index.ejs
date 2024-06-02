@@ -474,19 +474,45 @@
         let gridApiFcst;
         const gridOptionsForecast = {
           columnDefs: [
-         
             ],
             defaultColDef: {
                 sortable: true,
                 editable: true,
-                resizable: true
+                resizable: true,
+                enableCellChangeFlash: true
             },
               autoSizeStrategy: {
                   type: "fitCellContents"
             },
             singleClickEdit: true,
+            onCellValueChanged: onCellValueChanged,
         };   
        
+        function onCellValueChanged(event) {
+          var column = event.column.colDef.field;
+          var columnId = event.column.getId();
+          event.column.colDef.cellStyle = { 'background-color': 'cyan' };
+          event.api.refreshCells({
+                force: true,
+                columns: [column],
+                rowNodes: [event.node]
+        });
+        event.node.data['changed'] = true;
+        const rowData = [];
+        gridApiFcst.forEachNode(function (node) {
+          rowData.push(node.data);
+        });
+        alert(JSON.stringify(rowData));
+      };
+
+        // sets each columns headerName property
+        function setHeaderNames() {
+          var columnDefs = gridApiFcst.getColumnDefs();
+          columnDefs.forEach(function (colDef, index) {
+            colDef.headerName = 'C' + index;
+          });
+          gridApiFcst.setColumnDefs(columnDefs);
+        } 
 
         var gridDivForecast = document.querySelector("#myGridForecast");
         gridApiFcst = agGrid.createGrid(gridDivForecast, gridOptionsForecast);
@@ -501,12 +527,14 @@
           
           const keys = Object.keys(data[0])
           keys.forEach(key => {
-            if (key == 'descripcion')
-              colDefs.push({field : key,  pinned: 'left', editable: false});
+            if (key == 'ProductId' || key == 'LocationId')
+              colDefs.push({field : key, hide: true, cellDataType : 'number', editable: false, minWidth: 100, maxWidth: 200})
+            else if (key == 'Descripcion')
+              colDefs.push({field : key,  pinned: 'left', editable: false, colId: "Descripcion"});
             else
               colDefs.push({field : key});
           });
-          
+          //gridApiFcst.setColumnDefs(colDefs);
           gridApiFcst.setGridOption('columnDefs', colDefs);
           gridApiFcst.setGridOption("rowData", data);
         }
