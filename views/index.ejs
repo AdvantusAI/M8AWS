@@ -479,14 +479,13 @@
                 sortable: true,
                 editable: true,
                 resizable: true,
-                enableCellChangeFlash: true
+                enableCellChangeFlash: true,
             },
 
               autoSizeStrategy: {
                   type: "fitCellContents"
             },
             singleClickEdit: true,
-           
             onCellValueChanged: onCellValueChanged,
             onCellClicked : onCellClicked,
           
@@ -495,38 +494,61 @@
         function onCellClicked(event) {
           var column = event.column.colDef.field;
           const rowIndex = event.node.rowIndex;
-          //var columnId = event.column.getId();
-        
           if (rowIndex <2){
             gridApiFcst.stopEditing();
           };
-            
-          /*alert(newVal);
-          alert(rowIndex);
-          alert(column);
-          alert(rowNode.data.Descripcion);
-          */
+          if (rowIndex == 2 && column == 'descripcion')
+          {
+            gridApiFcst.stopEditing();
+          }
         };
 
         function onCellValueChanged(event) {
-      
-          const rowIndex = event.node.rowIndex;
-          var column = event.column.colDef.field;
-          var columnId = event.column.getId();
-          event.column.colDef.cellStyle = { 'background-color': '#f5d4bf' };
-          const rowNode = gridApiFcst.getRowNode(rowIndex); 
-          const newVal = event.newValue;
-          const oldVal = event.oldValue;
-          alert(rowIndex);
-          if (newVal != oldVal)
-              event.column.colDef.field.cellStyle = { 'background-color': '#f5d4bf' };
+        
 
-          event.api.refreshCells({
-                force: true,
-                columns: [column],
-                rowNodes: [event.node]
-        });
-        event.column.colDef.editable = false;
+        const rowIndex = event.node.rowIndex;
+        var column = event.column.colDef.field;
+        var columnId = event.column.getId();
+        event.column.colDef.cellStyle = { 'background-color': '#f5d4bf' };
+        const rowNode = gridApiFcst.getRowNode(rowIndex); 
+        const newVal = event.newValue;
+        const oldVal = event.oldValue;
+
+        
+
+
+       
+        alert(event.node.data.descripcion); // Descripcion del tipo de forecast
+        alert(columnId); // PostDate
+        alert(newVal); // Nuevo valor
+        if (newVal != oldVal)
+        {
+          fetch ('/api/dashboard/SaveGridChanges', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              'ProductId': lbllinkProduct.innerHTML,
+              'LocationId': lbllinkLocation.innerHTML,
+              'PostDate': columnId,
+              'ForecastType': event.node.data.descripcion,
+              'NewValue': newVal
+            })
+          })
+        } 
+        event.api.refreshCells({
+          force: true,
+          columns: [column],
+          rowNodes: [event.node]
+      });
+      //event.column.colDef.editable = false;
+      
+        var changedData = [event.data];
+        //alert(JSON.stringify(changedData));
+        //alert(existing);
+        //event.node.data['changed'] = true;
+      
       /*  alert(newVal);
         alert(rowIndex);
         alert(column);
@@ -534,6 +556,15 @@
         */
       };
 
+          
+          function printResult(res) {
+          
+            if (res.update) {
+              res.update.forEach((rowNode) => {
+                console.log("Updated Row Node", rowNode);
+              });
+            }
+          }
     
 
         var gridDivForecast = document.querySelector("#myGridForecast");
@@ -552,7 +583,7 @@
             if (key == 'ProductId' || key == 'LocationId')
               colDefs.push({field : key, hide: true, cellDataType : 'number', editable: false, minWidth: 100, maxWidth: 200})
             else if (key == 'Descripcion')
-              colDefs.push({field : key,  pinned: 'left', editable: false, colId: "Descripcion"  });
+              colDefs.push({field : key,   editable: false, pinned: 'left'  });
             else
               colDefs.push({field : key });
           });

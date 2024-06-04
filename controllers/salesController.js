@@ -34,5 +34,11 @@ const secretKey = 'your_jwt_secret';  // Deberías almacenar esto en variables d
       }
     };
     
+    exports.SaveGridChanges = async (req, res) => {
+      res.json(results);
+      const { changedRows, columnDefs } = req.body;
+      console.log('SaveGridChanges')
+      console.log(changedRows);
+     };
 
-
+   
