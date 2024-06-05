@@ -9,7 +9,7 @@ router.get('/test', ensureAuthenticated, salesController.totalSales);
 router.get('/dashboardCards', ensureAuthenticated, salesController.totalSales);
 
 router.get('/pivoted-history', async (req, res) => {
-    const { changedRows } = req.body;
+    const { productId, locationId } = req.query;
   
     try {
       const results = await getPivotedData(productId, locationId);
@@ -19,7 +19,7 @@ router.get('/pivoted-history', async (req, res) => {
     }
   });
 
+router.get('/SaveGridChanges',  salesController.SaveGridChanges);
 
-    
 
 module.exports = router;

@@ -350,7 +350,7 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <h4 class="card-title">Sales Analytics</h4>
-                        <p class="card-subtitle mb-4">From date of 1st Jan 2020 to continue</p>
+                        <button id="saveButton">Save Changes</button>
                         <div id="myGridForecast" class="ag-theme-custom" style="height: 500px; width: 100%;"></div>
                     </div>
                 </div>
@@ -364,6 +364,11 @@
 
 
   <script>
+
+       var changedRows = [];
+        var columnDefs = [];    
+
+
     function LoadData() {
         const productId = 'P019';
          const locationId = '8';
@@ -502,91 +507,21 @@
             gridApiFcst.stopEditing();
           }
         };
-
+     
+        
         function onCellValueChanged(event) {
-        
-
-        /*const rowIndex = event.node.rowIndex;
-        
-        var columnId = event.column.getId();
-        event.column.colDef.cellStyle = { 'background-color': '#f5d4bf' };
-        const rowNode = gridApiFcst.getRowNode(rowIndex); 
-        const newVal = event.newValue;
-        const oldVal = event.oldValue;
-
-        
-
-
-       
-        alert(event.node.data.descripcion); // Descripcion del tipo de forecast
-        alert(columnId); // PostDate
-        alert(newVal); // Nuevo valor
-        */
-        var column = event.column.colDef.field;
-        var columnId = event.column.getId();
-        const newVal = event.newValue;
-        var changedRows = [];
-        var columnDefs = [];
-
-        var data = event.data;
-        var existing = changedRows.find(row => row.id === data.id);
-        if (existing) {
+  
+          var data = event.data;
+            var existing = changedRows.find(row => row.id === data.id);
+            if (existing) {
                 Object.assign(existing, data);
             } else {
                 changedRows.push({ ...data });
             }
-           
-            if (changedRows.length > 0) 
-            {
-              fetch('/api/saveChanges', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({  
-                      'ProductId': lbllinkProduct.innerHTML,
-                      'LocationId': lbllinkLocation.innerHTML,
-                      'PostDate': event.column.getId(),
-                      'ForecastType': event.node.data.descripcion,
-                      'NewValue': newVal
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Success:', data);
-                    alert('Changes saved successfully!');
-                    changedRows = []; // Clear the local change collection after saving
-                })
-        } 
-        event.api.refreshCells({
-          force: true,
-          columns: [column],
-          rowNodes: [event.node]
-      });
-      //event.column.colDef.editable = false;
-      
-        var changedData = [event.data];
-        //alert(JSON.stringify(changedData));
-        //alert(existing);
-        //event.node.data['changed'] = true;
-      
-      /*  alert(newVal);
-        alert(rowIndex);
-        alert(column);
-        alert(rowNode.data.Descripcion);
-        */
+            console.log('Changed Rows:', changedRows);
       };
 
           
-          function printResult(res) {
-          
-            if (res.update) {
-              res.update.forEach((rowNode) => {
-                console.log("Updated Row Node", rowNode);
-              });
-            }
-          }
-    
 
         var gridDivForecast = document.querySelector("#myGridForecast");
         gridApiFcst = agGrid.createGrid(gridDivForecast, gridOptionsForecast);
@@ -603,7 +538,7 @@
           keys.forEach(key => {
             if (key == 'ProductId' || key == 'LocationId')
               colDefs.push({field : key, hide: true, cellDataType : 'number', editable: false, minWidth: 100, maxWidth: 200})
-            else if (key == 'Descripcion')
+            else if (key == 'descripcion')
               colDefs.push({field : key,   editable: false, pinned: 'left'  });
             else
               colDefs.push({field : key });
@@ -614,5 +549,28 @@
         }
       );
     }
-
+    // Save changes to the server
+    document.getElementById('saveButton').addEventListener('click', function() {
+            if (changedRows.length > 0) {
+                fetch('/api/saveChanges', { // Ensure this URL matches the server endpoint
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ changedRows, columnDefs })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    //console.log('Success:', data);
+                    alert('Changes saved successfully!');
+                    changedRows = []; // Clear the local change collection after saving
+                })
+                .catch((error) => {
+                    //console.error('Error:', error);
+                    alert('Failed to save changes.');
+                });
+            } else {
+                alert('No changes to save.');
+            }
+        });
   </script>

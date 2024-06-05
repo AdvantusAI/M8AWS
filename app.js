@@ -46,7 +46,6 @@ app.use('/api/', cataloguesRoutes)
 app.use('/api/dashboard/', dashboardRoutes)
 
 
-
 // Sync the models with the database
 sequelize.sync()
     .then(() => console.log('Database synced'))

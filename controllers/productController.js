@@ -2,6 +2,7 @@
 const jwt = require('jsonwebtoken');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
+const History = require('../models/History');
 
 const secretKey = 'your_jwt_secret';  // Deberías almacenar esto en variables de entorno.
 
@@ -49,15 +50,8 @@ exports.test = async (req, res) => {
 };
 
 exports.saveChanges = async (req, res) => {
-    const { ProductId, LocationId, PostDate,ForecastType, NewValue} = req.body;
-    res.json('LocationId');
-    res.json(LocationId);
-    res.json({ status: 'success', message: LocationId });
-    const updates = columns.map(col => `${col} = ?`).join(', ');
-    const sql = `UPDATE history SET Quantity=? WHERE ProductId = ? and LocationId = ? and PostDate = ? and ForecastType = 5`;
-    connection.query(sql, values, (err, results) => {
-        if (err) return reject(err);
-        resolve(results);
-    });
-    //console.log(columnDefs);
+    console.log('Endpoint hit');
+    const { changedRows } = req.body; 
+    console.log('Received changedRows:', changedRows);
 };
+  
