@@ -51,7 +51,10 @@ exports.test = async (req, res) => {
 
 exports.saveChanges = async (req, res) => {
     console.log('Endpoint hit');
-    const { changedRows } = req.body; 
-    console.log('Received changedRows:', changedRows);
+    const { changedRows, columnId, newVal } = req.body; 
+     console.log('Received changedRows:', changedRows);
+     console.log('Column:', columnId);
+     console.log('New Value:', newVal);
+    
 };
   

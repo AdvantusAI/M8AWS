@@ -365,9 +365,12 @@
 
   <script>
 
-       var changedRows = [];
+        var changedRows = [];
         var columnDefs = [];    
-
+        var column = null;
+        var columnId = null;
+        var newVal = null;
+        var PostDate = null;
 
     function LoadData() {
         const productId = 'P019';
@@ -519,6 +522,8 @@
                 changedRows.push({ ...data });
             }
             console.log('Changed Rows:', changedRows);
+            columnId = event.column.getId();
+            newVal = event.newValue;
       };
 
           
@@ -557,7 +562,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ changedRows, columnDefs })
+                    body: JSON.stringify({ changedRows, columnId, newVal })
                 })
                 .then(response => response.json())
                 .then(data => {
