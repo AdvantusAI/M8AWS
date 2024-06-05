@@ -6,9 +6,10 @@ const salesController = require('../controllers/salesController');
 const { getPivotedData } = require('../controllers/dashboardController');
 
 router.get('/test', ensureAuthenticated, salesController.totalSales);
+router.get('/dashboardCards', ensureAuthenticated, salesController.totalSales);
 
 router.get('/pivoted-history', async (req, res) => {
-    const { productId, locationId } = req.query;
+    const { changedRows } = req.body;
   
     try {
       const results = await getPivotedData(productId, locationId);
@@ -18,7 +19,7 @@ router.get('/pivoted-history', async (req, res) => {
     }
   });
 
-router.get('/SaveGridChanges',  salesController.SaveGridChanges);
 
+    
 
 module.exports = router;

@@ -10,5 +10,8 @@ router.get('/product', ensureAuthenticated, productController.ListCatProd);
 router.get('/locations', ensureAuthenticated, locationsController.ListLocations);
 router.get('/test', productController.test);
 
+router.post('/saveChanges', ensureAuthenticated, productController.saveChanges);
+
+
 
 module.exports = router;

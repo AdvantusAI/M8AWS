@@ -506,8 +506,8 @@
         function onCellValueChanged(event) {
         
 
-        const rowIndex = event.node.rowIndex;
-        var column = event.column.colDef.field;
+        /*const rowIndex = event.node.rowIndex;
+        
         var columnId = event.column.getId();
         event.column.colDef.cellStyle = { 'background-color': '#f5d4bf' };
         const rowNode = gridApiFcst.getRowNode(rowIndex); 
@@ -521,21 +521,42 @@
         alert(event.node.data.descripcion); // Descripcion del tipo de forecast
         alert(columnId); // PostDate
         alert(newVal); // Nuevo valor
-        if (newVal != oldVal)
-        {
-          fetch ('/api/dashboard/SaveGridChanges', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              'ProductId': lbllinkProduct.innerHTML,
-              'LocationId': lbllinkLocation.innerHTML,
-              'PostDate': columnId,
-              'ForecastType': event.node.data.descripcion,
-              'NewValue': newVal
-            })
-          })
+        */
+        var column = event.column.colDef.field;
+        var columnId = event.column.getId();
+        const newVal = event.newValue;
+        var changedRows = [];
+        var columnDefs = [];
+
+        var data = event.data;
+        var existing = changedRows.find(row => row.id === data.id);
+        if (existing) {
+                Object.assign(existing, data);
+            } else {
+                changedRows.push({ ...data });
+            }
+           
+            if (changedRows.length > 0) 
+            {
+              fetch('/api/saveChanges', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({  
+                      'ProductId': lbllinkProduct.innerHTML,
+                      'LocationId': lbllinkLocation.innerHTML,
+                      'PostDate': event.column.getId(),
+                      'ForecastType': event.node.data.descripcion,
+                      'NewValue': newVal
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    alert('Changes saved successfully!');
+                    changedRows = []; // Clear the local change collection after saving
+                })
         } 
         event.api.refreshCells({
           force: true,

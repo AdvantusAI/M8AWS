@@ -5,7 +5,6 @@ const dashboard_data = require('../models/dashboard_data');
 const secretKey = 'your_jwt_secret';  // Deberías almacenar esto en variables de entorno.
 
 
-
     exports.totalSales = async (req, res) => {
       console.log('dashboardCards')
       try {
@@ -35,10 +34,29 @@ const secretKey = 'your_jwt_secret';  // Deberías almacenar esto en variables d
     };
     
     exports.SaveGridChanges = async (req, res) => {
-      res.json(results);
-      const { changedRows, columnDefs } = req.body;
-      console.log('SaveGridChanges')
-      console.log(changedRows);
-     };
+      
+        const { ProductId, LocationId, PostDate, ForecastType, NewValue } = req.body;
+        console.log('SaveGridChanges');
+        console.log(req.body);
+        const updatePromises = changedRows.map(row => {
+          //return new Promise((resolve, reject) => {
+             // const columns = columnDefs.filter(col => col !== 'id');
+             // const updates = columns.map(col => `${col} = ?`).join(', ');
+             // const values = columns.map(col => row[col]);
+             // values.push(row.id); // Add the ID value at the end for the WHERE clause
+  
+              //const sql = `UPDATE history SET ${updates} WHERE id = ?`;
+  
+              //connection.query(sql, values, (err, results) => {
+               //   if (err) return reject(err);
+               //   resolve(results);
+            //  });
+          });
+      };
 
+
+        
+        
+        //console.log(changedRows);
+     
    

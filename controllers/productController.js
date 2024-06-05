@@ -47,4 +47,17 @@ exports.test = async (req, res) => {
     console.log('dashboardCards')
     res.json('dashboardCards');
 };
-  
+
+exports.saveChanges = async (req, res) => {
+    const { ProductId, LocationId, PostDate,ForecastType, NewValue} = req.body;
+    res.json('LocationId');
+    res.json(LocationId);
+    res.json({ status: 'success', message: LocationId });
+    const updates = columns.map(col => `${col} = ?`).join(', ');
+    const sql = `UPDATE history SET Quantity=? WHERE ProductId = ? and LocationId = ? and PostDate = ? and ForecastType = 5`;
+    connection.query(sql, values, (err, results) => {
+        if (err) return reject(err);
+        resolve(results);
+    });
+    //console.log(columnDefs);
+};
