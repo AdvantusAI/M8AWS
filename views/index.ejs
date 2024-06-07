@@ -371,10 +371,12 @@
         var columnId = null;
         var newVal = null;
         var PostDate = null;
+        var productId = null;
+        var locationId = null;
 
     function LoadData() {
-        const productId = 'P019';
-         const locationId = '8';
+        productId = 'P019';
+        locationId = '8';
          lbllinkLocation.innerHTML = productId;
          lbllinkProduct.innerHTML = locationId;
 
@@ -562,7 +564,8 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ changedRows, columnId, newVal })
+                    
+                    body: JSON.stringify({ changedRows, columnId, newVal, productId, locationId })
                 })
                 .then(response => response.json())
                 .then(data => {

@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const History = require('../models/History');
-
+const sequelize = require('../config/database');
 const secretKey = 'your_jwt_secret';  // Deberías almacenar esto en variables de entorno.
 
 // Define associations
@@ -51,10 +51,36 @@ exports.test = async (req, res) => {
 
 exports.saveChanges = async (req, res) => {
     console.log('Endpoint hit');
-    const { changedRows, columnId, newVal } = req.body; 
+    const { changedRows, columnId, newVal, productId, locationId} = req.body; 
      console.log('Received changedRows:', changedRows);
      console.log('Column:', columnId);
      console.log('New Value:', newVal);
-    
-};
+
+     
+     await sequelize.transaction(async (transaction) => { // Use 'transaction' instead of 't'
+        const updatePromises = changedRows.map(row => {
+            const updateValues = {
+              Quantity: newVal
+            };
+            const whereConditions = {
+              productId: productId,
+              locationId: locationId
+            };
+            console.log(`Updating row with conditions:`, whereConditions, `and values:`, updateValues);
+            
+
+            return History.update(updateValues, {
+                where: whereConditions,
+                transaction: transaction // Pass 'transaction' here
+              });
+            });
+     });
+
+     
+        const results = await Promise.all(updatePromises);
+        await transaction.commit(); // Commit the transaction if all updates are successful
+        //res.json({ status: 'success', message: 'Changes saved successfully!' });
+        console.log(`Update results:`, results);
+    };
+
   
