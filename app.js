@@ -1,6 +1,6 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const session = require('express-session');
+const session = require('cookie-session');
 const sequelize = require('./config/database');
 var bodyParser = require('body-parser')
 const userRoutes = require('./routes/userRoutes');
@@ -61,5 +61,5 @@ sequelize.sync()
 //});
 
 app.listen(process.env.PORT || 3000, () => {
-  console.log(`Example app listening at ${port}`)
+  console.log(`Example app listening `)
 })
