@@ -55,7 +55,11 @@ sequelize.sync()
 
 
 //const port = process.env.PORT || 3100;
-const PORT=5500;
-app.listen(PORT, () => {
-    console.log(`App running on port http://localhost:${PORT}...`);
-});
+//const PORT=5500;
+//app.listen(PORT, () => {
+//    console.log(`App running on port http://localhost:${PORT}...`);
+//});
+
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`Example app listening at ${port}`)
+})
