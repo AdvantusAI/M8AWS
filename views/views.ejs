@@ -1,0 +1,689 @@
+<%- include('../partials/header') %>
+<%- include('../partials/body') %>
+
+<link href="../assets/aggrid/ag-grid.css" rel="stylesheet" type="text/css" />
+<link href="../assets/aggrid/ag-grid-theme-builder.css" rel="stylesheet" type="text/css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
+<style>
+  /* Style for the loading icon */
+  #loading {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 9999; /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: hidden; /* Disable scrolling */
+      background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+  }
+
+  /* Center the icon inside the overlay */
+  #loading .spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 50px;
+      color: white;
+  }
+</style>
+
+<!-- Loading overlay -->
+<div id="loading">
+  <i class="fas fa-spinner fa-spin spinner"></i>
+</div>
+
+<script>
+  // Function to show the loading icon
+  function showLoading() {
+      document.getElementById('loading').style.display = 'block';
+
+      // Simulate a network request
+      setTimeout(function() {
+          document.getElementById('loading').style.display = 'none';
+      }, 1000); // Hide it after 3 seconds
+  }
+
+  function hideLoading() {
+      document.getElementById('loading').style.display = 'none';
+  }
+  
+</script>
+<!-- Loading overlay -->
+
+<!-- start page title -->
+  <div class="row">
+    <div class="col-12">
+      <div class="page-title-box d-flex align-items-center justify-content-between">
+        <h4 class="mb-0 font-size-18">Starter</h4>
+        <div class="page-title-right">
+          <ol class="breadcrumb m-0">
+            <!-- Button trigger modal -->
+
+            <a id="linkProduct" class="link-button" data-toggle="modal" style="cursor: pointer;"
+              data-target="#exampleModalPopovers"> Producto: &nbsp;</a>
+            <label id="lbllinkProduct" style="color: rgb(53, 61, 87); font-size: 14px"></label>
+            &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+            <a class="link-button" data-toggle="modal" data-target="#exampleModalLocations">
+              Localidad:&nbsp;</a><label id="lbllinkLocation" style="color: rgb(53, 61, 87); font-size: 14px"></label>
+            &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+
+            <a href="javascript:LoadData();" class="link-button" style="cursor: pointer; font-size: 16px"><i
+                class="mdi mdi-refresh"></i></a>
+
+            <div id="exampleModalPopovers" class="modal fade bd-example-modal-xl" tabindex="-1" role="dialog"
+              aria-labelledby="exampleModalPopoversLabel" aria-hidden="true">
+              <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalPopoversLabel">Seleccione el
+                      producto</h5>
+                    <button type="button" class="close waves-effect waves-light" data-dismiss="modal"
+                      aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div id="myGrid" class="ag-theme-custom" style="height: 500px; width: 100%;"></div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div id="exampleModalLocations" class="modal fade bd-example-modal-xl" tabindex="-1" role="dialog"
+              aria-labelledby="exampleModalLocationsLabel" aria-hidden="true">
+              <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLocationsLabel">Seleccione la localidad</h5>
+                    <button type="button" class="close waves-effect waves-light" data-dismiss="modal"
+                      aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div id="myGridLoc" class="ag-theme-custom" style="height: 500px; width: 100%;"></div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+
+            <script>
+             agGrid.LicenseManager.setLicenseKey("DownloadDevTools_COM_NDEwMjM0NTgwMDAwMA==59158b5225400879a12a96634544f5b6");
+              let gridApi;
+              const gridOptions = {
+                columnDefs: [
+                  // group cell renderer needed for expand / collapse icons
+                  { field: "categoryId", width: 90, minWidth: 50, maxWidth: 150, headerName: "Id. Categoría", cellRenderer: "agGroupCellRenderer", filter: true },
+                  { field: "categoryName", filter: true, headerName: "Nombre de la Categoría" },
+                ],
+                defaultColDef: {
+                  flex: 1,
+                },
+                masterDetail: true,
+                detailCellRendererParams: {
+                  detailGridOptions: {
+                    columnDefs: [
+
+                      {
+                        field: 'ProductId', headerName: 'Id. del producto', width: 90, minWidth: 50, maxWidth: 150, headerName: "Id. Producto", filter: true, cellRenderer: function (params) {
+                          let keyData = params.data.ProductId;
+                          let newLink = `<a onclick="UpdateProdSearch('${keyData}');"  style="cursor: pointer;" >${keyData}</a>`;
+                          return newLink;
+                        },
+                        flex: 1,
+                      },
+
+                      { field: "productName", width: 90, minWidth: 150, maxWidth: 250, headerName: "Nombre del Producto", filter: true },
+                      { field: "description", headerName: "Descripción", filter: true },
+                    ],
+                    defaultColDef: {
+                      flex: 1,
+                    },
+                    localeText: {
+                      searchOoo: "Search values...",
+                      noMatches: "No matches could be found.",
+                    },
+                  },
+                  getDetailRowData: (params) => {
+                    params.successCallback(params.data.Products);
+                  },
+                },
+              };
+              // setup the grid after the page has finished loading
+              document.addEventListener("DOMContentLoaded", function () {
+                var gridDiv = document.querySelector("#myGrid");
+                gridApi = agGrid.createGrid(gridDiv, gridOptions);
+
+                fetch("/api/product")
+                  .then((response) => response.json())
+                  .then((data) => {
+                    gridApi.setGridOption("rowData", data);
+                  });
+              });
+
+              function UpdateProdSearch(keyData) {
+
+                document.getElementById("lbllinkProduct").innerHTML = keyData;
+                $('#exampleModalPopovers').modal('hide');
+              }
+
+
+              let gridApiLoc;
+              const gridOptionsLoc = {
+                columnDefs: [
+                  // group cell renderer needed for expand / collapse icons
+
+                  {
+                    field: 'LocationId', headerName: 'Id. del Localidad', width: 90, minWidth: 50, maxWidth: 150, headerName: "Id. Localidad", filter: true, cellRenderer: function (params) {
+                      let keyData = params.data.LocationId;
+                      let newLink = `<a onclick="UpdateLocSearch('${keyData}');"  style="cursor: pointer;" >${keyData}</a>`;
+                      return newLink;
+                    },
+                    flex: 1,
+                  },
+                  {
+                    field: 'name', headerName: 'Nombre', width: 90, minWidth: 50, maxWidth: 150, headerName: "Nombre", filter: true, cellRenderer: function (params) {
+                      let keyData = params.data.LocationId;
+                      let newLink = `<a onclick="UpdateLocSearch('${keyData}');"  style="cursor: pointer;" >${params.data.name}</a>`;
+                      return newLink;
+                    },
+                    flex: 1,
+                  },
+                  { field: "name", filter: true, headerName: "Nombre" },
+                  { field: "city", filter: true, headerName: "Ciudad" },
+                  { field: "region", filter: true, headerName: "Región" },
+                  { field: "country", filter: true, headerName: "País" },
+                ],
+                defaultColDef: {
+                  flex: 1,
+                },
+              };
+              // setup the grid after the page has finished loading
+              document.addEventListener("DOMContentLoaded", function () {
+                var gridDivLoc = document.querySelector("#myGridLoc");
+                gridApiLoc = agGrid.createGrid(gridDivLoc, gridOptionsLoc);
+
+                fetch("/api/locations")
+                  .then((response) => response.json())
+                  .then((data) => {
+                    gridApiLoc.setGridOption("rowData", data.locations);
+                  });
+              });
+
+              function UpdateLocSearch(keyData) {
+
+                document.getElementById("lbllinkLocation").innerHTML = keyData;
+                $('#exampleModalLocations').modal('hide');
+              }
+            </script>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="row" >
+
+    <div class="col-md-6 col-xl-3" id="Card1" style="display: none;">
+      <div class="card">
+        <div class="card-body">
+          <div class="mb-4">
+            <span class="badge badge-soft-primary float-right"><a id="LastUpdate"></a></span>
+            <span class="badge badge-soft-primary float-right"></label></span>
+            <h5 class="card-title mb-0">Ventas (YTD)</h5>
+          </div>
+          <div class="row d-flex align-items-center mb-4">
+            <div class="col-8">
+              <h2 class="d-flex align-items-center mb-0">
+                <a id="LblVentasTotales"></a>
+              </h2>
+            </div>
+            <div class="col-4 text-right">
+              <span class="text-muted">12.5% <i class="mdi mdi-arrow-up text-success"></i></span>
+            </div>
+          </div>
+          <div class="progress shadow-sm" style="height: 5px;">
+            <div class="progress-bar bg-success" role="progressbar" style="width: 100%;">
+            </div>
+          </div>
+        </div>
+        <!--end card body-->
+      </div><!-- end card-->
+    </div> <!-- end col-->
+    <div class="col-md-6 col-xl-3" id="Card2" style="display: none;">
+      <div class="card">
+        <div class="card-body">
+          <div class="mb-4">
+            <span class="badge badge-soft-primary float-right"></span>
+            <h5 class="card-title mb-0">Ventas unidades</h5>
+          </div>
+          <div class="row d-flex align-items-center mb-4">
+            <div class="col-8">
+              <h2 class="d-flex align-items-center mb-0">
+                <a id="LblVentasPiezas"></a>
+              </h2>
+            </div>
+            <div class="col-4 text-right">
+              
+            </div>
+          </div>
+
+          <div class="progress shadow-sm" style="height: 5px;">
+            <div class="progress-bar bg-success" role="progressbar" style="width: 100%;">
+            </div>
+          </div>
+        </div>
+        <!--end card body-->
+      </div><!-- end card-->
+    </div> <!-- end col-->
+
+    <div class="col-md-6 col-xl-3" id="Card3" style="display: none;">
+      <div class="card">
+        <div class="card-body">
+          <div class="mb-4">
+            <span class="badge badge-soft-primary float-right">Semanal</span>
+            <h5 class="card-title mb-0">Asertividad demanda</h5>
+          </div>
+          <div class="row d-flex align-items-center mb-4">
+            <div class="col-8">
+              <h2 class="d-flex align-items-center mb-0">
+                <a id="LblAsertividad"></a>
+              </h2>
+            </div>
+            <div class="col-4 text-right">
+              <span class="text-muted">57% <i class="mdi mdi-arrow-up text-success"></i></span>
+            </div>
+          </div>
+
+          <div class="progress shadow-sm" style="height: 5px;">
+            <div class="progress-bar bg-warning" role="progressbar" style="width: 100%;">
+            </div>
+          </div>
+        </div>
+        <!--end card body-->
+      </div>
+      <!--end card-->
+    </div> <!-- end col-->
+
+    <div class="col-md-6 col-xl-3" id="Card4" style="display: none;">
+      <div class="card">
+        <div class="card-body">
+          <div class="mb-4">
+            <span class="badge badge-soft-primary float-right">YTD</span>
+            <h5 class="card-title mb-0">Ventas planeadas $</h5>
+          </div>
+          <div class="row d-flex align-items-center mb-4">
+            <div class="col-8">
+              <h2 class="d-flex align-items-center mb-0">
+                <a id="LblVentasPlaneadas"></a>
+              </h2>
+            </div>
+            <div class="col-4 text-right">
+             
+            </div>
+          </div>
+
+          <div class="progress shadow-sm" style="height: 5px;">
+            <div class="progress-bar bg-danger" role="progressbar" style="width: 100%;"></div>
+          </div>
+        </div>
+        <!--end card body-->
+      </div><!-- end card-->
+    </div> <!-- end col-->
+  </div>
+  <!-- end row-->
+
+  
+  <!-- POST GAME ANALYSIS -->
+  <div class="row" id="Card5" style="display: none;">
+    <div class="col-lg-12">
+
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h4 class="card-title">Sales Analytics</h4>
+                        <button id="saveButton">Save Changes</button>
+                        <div id="myGridForecast" class="ag-theme-custom" style="height: 500px; width: 100%;"></div>
+                        <div id="myLineChartContainer">
+                          <canvas id="myLineChart"></canvas>
+                        </div>                    
+                    
+                      </div>
+                </div>
+            </div>
+            <!--end card body-->
+        </div> <!-- end card-->
+    </div> <!-- end col -->
+  </div><!-- end col -->
+</div>
+<!--end row-->
+
+
+  <script>
+
+        var changedRows = [];
+        var columnDefs = [];    
+        var column = null;
+        var columnId = null;
+        var newVal = null;
+        var PostDate = null;
+
+    function LoadData() {
+        const productId = 'P019';
+         const locationId = '8';
+         lbllinkLocation.innerHTML = productId;
+         lbllinkProduct.innerHTML = locationId;
+
+      if (lbllinkLocation.innerHTML == "") {
+        Alert('Por favor seleccione la localidad');
+        //alert("Por favor seleccione un producto y una localidad");
+        return;
+      }
+      else if (lbllinkProduct.innerHTML == "") {
+        Alert('Por favor seleccione el producto');
+        //alert("Por favor seleccione un producto y una localidad");
+        return;
+      }
+      else {
+        handleButtonClick()
+        
+      }
+
+    }
+    // Function to handle button click
+    async function handleButtonClick() {
+          await showLoading();
+          // Execute the next function after showLoading finishes
+          fetchData();
+          $("#Card1").show();
+          $("#Card2").show();
+          $("#Card3").show();
+          $("#Card4").show();
+          $("#Card5").show();
+          
+            }
+    //Danger
+    function Alert(mensaje) {
+      Swal.fire({
+        type: 'error',
+        title: 'Oops...',
+        text: mensaje,
+        confirmButtonClass: 'btn btn-confirm mt-2',
+      }
+      );
+    }
+    function showLoading() {
+          return new Promise((resolve) => {
+              document.getElementById('loading').style.display = 'block';
+
+              // Simulate a network request or async operation
+              setTimeout(function() {
+                  document.getElementById('loading').style.display = 'none';
+                  resolve(); // Resolve the promise when the loading is done
+              }, 300); // Hide it after 3 seconds
+          });
+      }
+  
+
+
+      // Function to fetch data from the API
+      async function fetchData() {
+          showLoading();
+         
+         const productId = 'P019';
+         const locationId = '8';
+         // const productId = document.getElementById('lbllinkProduct').innerHTML;
+         // const locationId = document.getElementById('lbllinkLocation').innerHTML;
+
+          const params = new URLSearchParams({ productId, locationId });
+
+          try {
+              const response = await fetch(`/api/dashboard/dashboardCards?${params.toString()}`);
+              const data = await response.json();
+              if (data.dashboard_Data != null)
+              {
+                  FillCards(data.dashboard_Data);
+                  LlenaGrid();
+              };
+              //document.getElementById('data').textContent = JSON.stringify(data.dashboard_Data, null, 2);
+          } catch (error) {
+              console.error("Error fetching data:", error);
+          } finally {
+              hideLoading();
+          }
+      }
+
+      function FillCards(dashboard_Data) {
+        LblVentasTotales.innerHTML = "$" + numberWithCommas(dashboard_Data[0].Ventas_pesos); 
+        LastUpdate.innerHTML = formatDate(dashboard_Data[0].Ult_actualizacion); 
+        LblVentasPiezas.innerHTML = "$" + numberWithCommas(dashboard_Data[0].Ventas_piezas); 
+        LblAsertividad.innerHTML = dashboard_Data[0].Accuracy + "%"; 
+        LblVentasPlaneadas.innerHTML = "$" + numberWithCommas(dashboard_Data[0].Plan_ventas_pesos); 
+      }
+
+      function numberWithCommas(x) {
+          return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+      function formatDate(mySQLDate) {
+        const date = new Date(mySQLDate);
+       // Step 3: Format the Date object to a short date string (MM/DD/YYYY)
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+      const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+      return formattedDate;
+      }
+
+      function LlenaGrid()
+      {
+        let gridApiFcst;
+        const gridOptionsForecast = {
+          columnDefs: [
+            ],
+            defaultColDef: {
+                sortable: true,
+                editable: true,
+                resizable: true,
+                enableCellChangeFlash: true,
+            },
+
+              autoSizeStrategy: {
+                  type: "fitCellContents"
+            },
+            singleClickEdit: true,
+            onCellValueChanged: onCellValueChanged,
+            onCellClicked : onCellClicked,
+          
+        };   
+
+        function onCellClicked(event) {
+          var column = event.column.colDef.field;
+          const rowIndex = event.node.rowIndex;
+          if (rowIndex <2){
+            gridApiFcst.stopEditing();
+          };
+          if (rowIndex == 2 && column == 'descripcion')
+          {
+            gridApiFcst.stopEditing();
+          }
+        };
+     
+        
+        function onCellValueChanged(event) {
+  
+          var data = event.data;
+            var existing = changedRows.find(row => row.id === data.id);
+            if (existing) {
+                Object.assign(existing, data);
+            } else {
+                changedRows.push({ ...data });
+            }
+            console.log('Changed Rows:', changedRows);
+            columnId = event.column.getId();
+            newVal = event.newValue;
+      };
+
+          
+
+        var gridDivForecast = document.querySelector("#myGridForecast");
+        gridApiFcst = agGrid.createGrid(gridDivForecast, gridOptionsForecast);
+        const productId = 'P019';
+        const locationId = '8';
+        const apiCall = `/api/dashboard/pivoted-history?productId=${encodeURIComponent(productId)}&locationId=${encodeURIComponent(locationId)}`
+        fetch(apiCall)
+          .then((response) => response.json())
+          .then((data) => {
+            // set the column headers from the data
+          const colDefs = gridApiFcst.getColumnDefs();
+          
+          const keys = Object.keys(data[0]);
+          keys.forEach(key => {
+            if (key == 'ProductId' || key == 'LocationId')
+              colDefs.push({field : key, hide: true, cellDataType : 'number', editable: false, minWidth: 100, maxWidth: 200})
+            else if (key == 'descripcion')
+              colDefs.push({field : key,   editable: false, pinned: 'left'  });
+            else
+              colDefs.push({field : key });
+          });
+          //gridApiFcst.setColumnDefs(colDefs);
+          gridApiFcst.setGridOption('columnDefs', colDefs);
+          gridApiFcst.setGridOption("rowData", data);
+        }
+      );
+    }
+    fetch('/api/history', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Process the data to get the required format for the chart
+            const processedData = processData(data.history);
+
+            // Create the chart
+            const ctx = document.getElementById('myLineChart').getContext('2d');
+            const myLineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: processedData.labels,
+                    datasets: [
+                        {
+                            label: 'Histórico de nulos',
+                            data: processedData.y1,
+                            borderColor: 'rgba(0, 87, 128, 1)',
+                            borderWidth: 1,
+                            fill: false
+                        },
+                        {
+                            label: 'Historia descauzalizada(Sistema)',
+                            data: processedData.y2,
+                            borderColor: 'rgba(235, 140, 52,1)',
+                            borderWidth: 1,
+                            fill: false
+                        },
+                        {
+                            label: 'Forecast causal (AdvantusAI.Predict)',
+                            data: processedData.y5,
+                            borderColor: 'rgba(1, 82, 30, 1)',
+                            borderWidth: 1,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'month'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Quantity'
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert(error);
+        });
+
+        function processData(data) {
+            const labels = [];
+            const y1 = [];
+            const y2 = [];
+            const y5 = [];
+
+            const dateSet = new Set();
+
+            data.forEach(item => {
+                if (item.Quantity === null) {
+                    return; // Skip entries with Quantity null
+                }
+
+                const date = new Date(item.PostDate);
+                const dateString = date.toISOString().split('T')[0];
+
+                if (!dateSet.has(dateString)) {
+                    labels.push(dateString);
+                    dateSet.add(dateString);
+                }
+
+                if (item.Type === '1') {
+                    y1.push({ x: dateString, y: item.Quantity });
+                } else if (item.Type === '2') {
+                    y2.push({ x: dateString, y: item.Quantity });
+                } else if (item.Type === '5') {
+                    y5.push({ x: dateString, y: item.Quantity });
+                }
+            });
+
+            return { labels, y1, y2, y5 };
+        }
+    // Save changes to the server
+    document.getElementById('saveButton').addEventListener('click', function() {
+            if (changedRows.length > 0) {
+                fetch('/api/saveChanges', { // Ensure this URL matches the server endpoint
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ changedRows, columnId, newVal })
+                })
+                .then(response => response.text())
+                .then(data => {
+                    //console.log('Success:', data);
+                    alert('Changes saved successfully!');
+                    window.location.reload();
+                    changedRows = []; // Clear the local change collection after saving
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert(error);
+                });
+            } else {
+                alert('No changes to save.');
+            }
+        });
+  </script>

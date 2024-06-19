@@ -23,6 +23,10 @@ router.get('/index', ensureAuthenticated, (req, res) => {
 });
 
 
+router.get('/views', ensureAuthenticated, (req, res) => {
+  res.render('views');
+});
+
 
 
 

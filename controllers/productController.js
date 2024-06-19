@@ -3,7 +3,8 @@ const jwt = require('jsonwebtoken');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const History = require('../models/History');
-const sequelize = require('../config/database');
+const { Sequelize } = require('sequelize');
+
 const secretKey = 'your_jwt_secret';  // Deberías almacenar esto en variables de entorno.
 
 // Define associations
@@ -25,6 +26,26 @@ exports.ListProducts = async (req, res) => {
       console.error('Failed to retrieve products:', error);
       res.status(500).send('Error retrieving data.');
   }
+};
+
+exports.ListHistory = async (req, res) => {
+    try {
+        const history = await History.findAll({
+            attributes: [
+                'ProductId',
+                'LocationId',
+                'Type',
+                'PostDate',
+                [Sequelize.fn('SUM', Sequelize.col('Quantity')), 'Quantity']
+            ],
+            group: ['ProductId', 'LocationId', 'Type', 'PostDate'],
+            order: [['PostDate', 'ASC']]
+        });
+        res.json({ history });
+    } catch (error) {
+        console.error('Failed to retrieve history:', error);
+        res.status(500).send('Error retrieving data.');
+    }
 };
 
 
@@ -51,36 +72,37 @@ exports.test = async (req, res) => {
 
 exports.saveChanges = async (req, res) => {
     console.log('Endpoint hit');
-    const { changedRows, columnId, newVal, productId, locationId} = req.body; 
-     console.log('Received changedRows:', changedRows);
-     console.log('Column:', columnId);
-     console.log('New Value:', newVal);
+    const { changedRows, columnId, newVal } = req.body; 
+    console.log('Received changedRows:', changedRows);
+    console.log('Column:', columnId);
+    console.log('New Value:', newVal);
 
-     
-     await sequelize.transaction(async (transaction) => { // Use 'transaction' instead of 't'
-        const updatePromises = changedRows.map(row => {
-            const updateValues = {
-              Quantity: newVal
-            };
-            const whereConditions = {
-              productId: productId,
-              locationId: locationId
-            };
-            console.log(`Updating row with conditions:`, whereConditions, `and values:`, updateValues);
-            
-
-            return History.update(updateValues, {
-                where: whereConditions,
-                transaction: transaction // Pass 'transaction' here
-              });
+    // Create an array of update promises
+    const updatePromises = Object.keys(changedRows[0])
+        .filter(F => F !== 'ProductId' && F !== 'LocationId' && F !== 'descripcion' && changedRows[0][F] !== null)
+        .map(async K => {
+            const record = await History.findOne({
+                where: {
+                    ProductId: changedRows[0]['ProductId'],
+                    LocationId: changedRows[0]['LocationId'],
+                    Type: 5,
+                    PostDate: new Date(K)
+                }
             });
-     });
 
-     
-        const results = await Promise.all(updatePromises);
-        await transaction.commit(); // Commit the transaction if all updates are successful
-        //res.json({ status: 'success', message: 'Changes saved successfully!' });
-        console.log(`Update results:`, results);
-    };
+            if (record) {
+                return record.update({
+                    "Quantity": changedRows[0][K]
+                });
+            }
+        });
 
-  
+    try {
+        // Execute all update promises in parallel
+        await Promise.all(updatePromises);
+        res.status(200).send('Updates successful');
+    } catch (error) {
+        console.error('Error updating rows:', error);
+        res.status(500).send('Error updating rows');
+    }
+};
